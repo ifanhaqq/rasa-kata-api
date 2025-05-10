@@ -1,8 +1,23 @@
 const db = require("./db");
 
 const getAllFeedbacksHandler = async (request, h) => {
-  const res = await db.query("SELECT * FROM feedback_videos");
-  return h.response(res.rows);
+  try {
+    const data = await db.query("SELECT * FROM feedback_videos");
+
+    const response = h.response({
+      status: "success",
+      data: data.rows,
+    });
+
+    return response.code(200);
+  } catch (error) {
+    const response = h.response({
+      status: "error",
+      message: error
+    })
+
+    return response.code(400);
+  }
 };
 
 const addFeedbackHandler = async (request, h) => {
@@ -21,5 +36,5 @@ const addFeedbackHandler = async (request, h) => {
 
 module.exports = {
   getAllFeedbacksHandler,
-  addFeedbackHandler
+  addFeedbackHandler,
 };
