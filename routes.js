@@ -1,4 +1,10 @@
-const { getAllFeedbacksHandler, addFeedbackHandler } = require("./handler");
+const {
+  getAllFeedbacksHandler,
+  addFeedbackHandler,
+  getAllStoryPostsHandler,
+  addStoryPostHandler,
+  getStoryById,
+} = require("./handler");
 
 module.exports = [
   {
@@ -15,12 +21,27 @@ module.exports = [
   },
   {
     method: "GET",
-    path: "/feedback",
+    path: "/api/feedback",
     handler: getAllFeedbacksHandler,
   },
   {
     method: "POST",
-    path: "/feedback",
+    path: "/api/feedback",
     handler: addFeedbackHandler,
+  },
+  {
+    method: "GET",
+    path: "/api/story",
+    handler: getAllStoryPostsHandler,
+  },
+  {
+    method: "POST",
+    path: "/api/story",
+    handler: addStoryPostHandler,
+  },
+  {
+    method: "GET",
+    path: "/api/story/{id}",
+    handler: getStoryById,
   },
 ];
