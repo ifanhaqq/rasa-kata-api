@@ -40,30 +40,50 @@ const addFeedbackHandler = async (request, h) => {
 
 const getAllStoryPostsHandler = async (request, h) => {
   try {
-    const data = await db.query("SELECT * FROM story_posts");
+    // 1. Fetch all stories (avoid SELECT * for security & performance)
+    const { rows: stories } = await db.query(
+      "SELECT id, content, created_at, updated_at FROM story_posts ORDER BY created_at DESC"
+    );
 
-    const response = h.response({
-      status: "success",
-      data: data.rows,
+    // 2. Get comment counts in a single query (instead of N+1 queries)
+    const { rows: commentCounts } = await db.query(
+      `SELECT post_id, COUNT(*)::int AS comments_count 
+       FROM story_comments 
+       WHERE post_id = ANY($1::int[]) 
+       GROUP BY post_id`,
+      [stories.map(story => story.id)]
+    );
+
+    // 3. Map comment counts to stories efficiently
+    const storiesWithComments = stories.map(story => {
+      const commentData = commentCounts.find(c => c.post_id === story.id);
+      return {
+        ...story,
+        commentsCount: commentData ? commentData.comments_count : 0,
+      };
     });
 
-    return response.code(200);
-  } catch (error) {
-    const response = h.response({
-      status: "error",
-      message: error
-    })
+    return h.response({
+      status: "success",
+      data: storiesWithComments,
+    }).code(200);
 
-    return response.code(400);
+  } catch (error) {
+    console.error("Error fetching story posts:", error); // Log for debugging
+    return h.response({
+      status: "error",
+      message: "Failed to fetch story posts", // Don't expose raw errors
+    }).code(500); // Use 500 for server errors (400 is for client errors)
   }
-}
+};
 
 const getStoryById = async (request, h) => {
   try {
     const { id } = request.params;
-    const data = await db.query("SELECT * FROM story_posts WHERE id = $1", [id]);
+    const story = await db.query("SELECT * FROM story_posts WHERE id = $1", [id]);
+    const comments = await db.query("SELECT * FROM story_comments WHERE post_id = $1", [id]);
 
-    if (data.rows.length === 0) {
+    if (story.rows.length === 0) {
       return h.response({
         status: "error",
         message: "Story not found",
@@ -72,7 +92,10 @@ const getStoryById = async (request, h) => {
 
     const response = h.response({
       status: "success",
-      data: data.rows[0],
+      data: {
+        ...story.rows[0],
+        comments: comments.rows,
+      },
     });
 
     return response.code(200);
@@ -105,10 +128,53 @@ const addStoryPostHandler = async (request, h) => {
   }
 }
 
+const getStoryCommentsHandler = async (request, h) => {
+  try {
+    const { id } = request.params;
+    const data = await db.query("SELECT * FROM story_comments WHERE post_id = $1", [id]);
+
+    const response = h.response({
+      status: "success",
+      data: data.rows,
+    });
+
+    return response.code(200);
+  } catch (error) {
+    const response = h.response({
+      status: "error",
+      message: error
+    })
+
+    return response.code(400);
+  }
+}
+
+const addStoryCommentHandler = async (request, h) => {
+  try {
+    const { content } = request.payload;
+    const { id } = request.params;
+    const timestamp = new Date().toISOString();
+    const res = await db.query(
+      "INSERT INTO story_comments (post_id, content, created_at, updated_at) VALUES ($1, $2, $3, $4) RETURNING *",
+      [id, content, timestamp, timestamp]
+    );
+    return h.response(res.rows[0]).code(201);
+  } catch (error) {
+    const response = h.response({
+      status: "error",
+      message: error
+    })
+
+    return response.code(400);
+  }
+}
+
 module.exports = {
   getAllFeedbacksHandler,
   addFeedbackHandler,
   getAllStoryPostsHandler,
   addStoryPostHandler,
-  getStoryById
+  getStoryById,
+  getStoryCommentsHandler,
+  addStoryCommentHandler
 };

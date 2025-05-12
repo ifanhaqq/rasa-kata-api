@@ -4,6 +4,8 @@ const {
   getAllStoryPostsHandler,
   addStoryPostHandler,
   getStoryById,
+  getStoryCommentsHandler,
+  addStoryCommentHandler
 } = require("./handler");
 
 module.exports = [
@@ -44,4 +46,14 @@ module.exports = [
     path: "/api/story/{id}",
     handler: getStoryById,
   },
+  {
+    method: "GET",
+    path: "/api/story/{id}/comments",
+    handler: getStoryCommentsHandler,
+  },
+  {
+    method: "POST",
+    path: "/api/story/{id}/comments",
+    handler: addStoryCommentHandler,
+  }
 ];
