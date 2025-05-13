@@ -154,11 +154,22 @@ const addStoryCommentHandler = async (request, h) => {
     const { content } = request.payload;
     const { id } = request.params;
     const timestamp = new Date().toISOString();
-    const res = await db.query(
+    await db.query(
       "INSERT INTO story_comments (post_id, content, created_at, updated_at) VALUES ($1, $2, $3, $4) RETURNING *",
       [id, content, timestamp, timestamp]
     );
-    return h.response(res.rows[0]).code(201);
+
+    const story = await db.query(
+      "SELECT * FROM story_posts WHERE id = $1 ORDER BY created_at DESC",
+      [id]
+    );
+
+    const comments = await db.query(
+      "SELECT * FROM story_comments WHERE post_id = $1 ORDER BY created_at DESC",
+      [id]
+    );
+
+    return h.response({...story.rows[0], comments: comments.rows}).code(201);
   } catch (error) {
     const response = h.response({
       status: "error",
