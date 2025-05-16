@@ -5,8 +5,11 @@ const {
   addStoryPostHandler,
   getStoryById,
   getStoryCommentsHandler,
-  addStoryCommentHandler
+  addStoryCommentHandler,
+  getPrediction,
 } = require("./handler");
+
+const generateRandomUsername = require("./utils/generateRandomUsername");
 
 module.exports = [
   {
@@ -55,5 +58,20 @@ module.exports = [
     method: "POST",
     path: "/api/story/{id}/comments",
     handler: addStoryCommentHandler,
+  },
+  {
+    method: "GET",
+    path: "/api/random",
+    handler: (request, h) => {
+      return h.response({
+        status: "success",
+        username: generateRandomUsername(),
+      });
+    }
+  },
+  {
+    method: "POST",
+    path: "/api/predict",
+    handler: getPrediction
   }
 ];

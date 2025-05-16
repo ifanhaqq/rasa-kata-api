@@ -1,4 +1,5 @@
 const db = require("./db");
+const axios = require("axios");
 
 const getAllFeedbacksHandler = async (request, h) => {
   try {
@@ -13,8 +14,8 @@ const getAllFeedbacksHandler = async (request, h) => {
   } catch (error) {
     const response = h.response({
       status: "error",
-      message: error
-    })
+      message: error,
+    });
 
     return response.code(400);
   }
@@ -31,8 +32,8 @@ const addFeedbackHandler = async (request, h) => {
   } catch (error) {
     const response = h.response({
       status: "error",
-      message: error
-    })
+      message: error,
+    });
 
     return response.code(400);
   }
@@ -51,43 +52,53 @@ const getAllStoryPostsHandler = async (request, h) => {
        FROM story_comments 
        WHERE post_id = ANY($1::int[]) 
        GROUP BY post_id`,
-      [stories.map(story => story.id)]
+      [stories.map((story) => story.id)]
     );
 
     // 3. Map comment counts to stories efficiently
-    const storiesWithComments = stories.map(story => {
-      const commentData = commentCounts.find(c => c.post_id === story.id);
+    const storiesWithComments = stories.map((story) => {
+      const commentData = commentCounts.find((c) => c.post_id === story.id);
       return {
         ...story,
         commentsCount: commentData ? commentData.comments_count : 0,
       };
     });
 
-    return h.response({
-      status: "success",
-      data: storiesWithComments,
-    }).code(200);
-
+    return h
+      .response({
+        status: "success",
+        data: storiesWithComments,
+      })
+      .code(200);
   } catch (error) {
     console.error("Error fetching story posts:", error); // Log for debugging
-    return h.response({
-      status: "error",
-      message: "Failed to fetch story posts", // Don't expose raw errors
-    }).code(500); // Use 500 for server errors (400 is for client errors)
+    return h
+      .response({
+        status: "error",
+        message: "Failed to fetch story posts", // Don't expose raw errors
+      })
+      .code(500); // Use 500 for server errors (400 is for client errors)
   }
 };
 
 const getStoryById = async (request, h) => {
   try {
     const { id } = request.params;
-    const story = await db.query("SELECT * FROM story_posts WHERE id = $1", [id]);
-    const comments = await db.query("SELECT * FROM story_comments WHERE post_id = $1", [id]);
+    const story = await db.query("SELECT * FROM story_posts WHERE id = $1", [
+      id,
+    ]);
+    const comments = await db.query(
+      "SELECT * FROM story_comments WHERE post_id = $1",
+      [id]
+    );
 
     if (story.rows.length === 0) {
-      return h.response({
-        status: "error",
-        message: "Story not found",
-      }).code(404);
+      return h
+        .response({
+          status: "error",
+          message: "Story not found",
+        })
+        .code(404);
     }
 
     const response = h.response({
@@ -102,12 +113,12 @@ const getStoryById = async (request, h) => {
   } catch (error) {
     const response = h.response({
       status: "error",
-      message: error
-    })
+      message: error,
+    });
 
     return response.code(400);
   }
-}
+};
 
 const addStoryPostHandler = async (request, h) => {
   try {
@@ -121,17 +132,20 @@ const addStoryPostHandler = async (request, h) => {
   } catch (error) {
     const response = h.response({
       status: "error",
-      message: error
-    })
+      message: error,
+    });
 
     return response.code(400);
   }
-}
+};
 
 const getStoryCommentsHandler = async (request, h) => {
   try {
     const { id } = request.params;
-    const data = await db.query("SELECT * FROM story_comments WHERE post_id = $1", [id]);
+    const data = await db.query(
+      "SELECT * FROM story_comments WHERE post_id = $1",
+      [id]
+    );
 
     const response = h.response({
       status: "success",
@@ -142,12 +156,12 @@ const getStoryCommentsHandler = async (request, h) => {
   } catch (error) {
     const response = h.response({
       status: "error",
-      message: error
-    })
+      message: error,
+    });
 
     return response.code(400);
   }
-}
+};
 
 const addStoryCommentHandler = async (request, h) => {
   try {
@@ -169,16 +183,42 @@ const addStoryCommentHandler = async (request, h) => {
       [id]
     );
 
-    return h.response({...story.rows[0], comments: comments.rows}).code(201);
+    return h.response({ ...story.rows[0], comments: comments.rows }).code(201);
   } catch (error) {
     const response = h.response({
       status: "error",
-      message: error
-    })
+      message: error,
+    });
 
     return response.code(400);
   }
-}
+};
+
+const getPrediction = async (request, h) => {
+  try {
+    const { text } = request.payload;
+    const response = await axios.post(
+      "https://api.rasakatamodel.live/predict",
+      {
+        kalimat: text,
+      }
+    );
+
+    return h
+      .response({
+        status: "success",
+        data: response.data,
+      })
+      .code(200);
+  } catch (error) {
+    return h
+      .response({
+        status: "error",
+        message: error.message,
+      })
+      .code(400);
+  }
+};
 
 module.exports = {
   getAllFeedbacksHandler,
@@ -187,5 +227,6 @@ module.exports = {
   addStoryPostHandler,
   getStoryById,
   getStoryCommentsHandler,
-  addStoryCommentHandler
+  addStoryCommentHandler,
+  getPrediction,
 };
