@@ -204,10 +204,20 @@ const getPrediction = async (request, h) => {
       }
     );
 
+    const emotionCode = response.data.label_prediksi;
+    const feedbackRecommendation = await db.query(
+      "SELECT * FROM feedback_videos WHERE emotion_code = $1 ORDER BY RANDOM() LIMIT 3",
+      [emotionCode]
+    );
+
     return h
       .response({
         status: "success",
-        data: response.data,
+        data: {
+          emotion: response.data.emosi,
+          emotionCode: emotionCode,
+          feedbackRecommendation: feedbackRecommendation.rows,
+        },
       })
       .code(200);
   } catch (error) {
