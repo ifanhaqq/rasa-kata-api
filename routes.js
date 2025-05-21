@@ -7,6 +7,8 @@ const {
   getStoryCommentsHandler,
   addStoryCommentHandler,
   getPrediction,
+  getEmotionsByUserIdHandler,
+  postEmotionHandler,
 } = require("./handler");
 
 const generateRandomUsername = require("./utils/generateRandomUsername");
@@ -73,5 +75,15 @@ module.exports = [
     method: "POST",
     path: "/api/predict",
     handler: getPrediction
+  },
+  {
+    method: "GET",
+    path: "/api/emotion/{userId}",
+    handler: getEmotionsByUserIdHandler
+  },
+  {
+    method: "POST",
+    path: "/api/emotion",
+    handler: postEmotionHandler
   }
 ];

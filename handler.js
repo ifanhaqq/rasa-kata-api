@@ -230,6 +230,56 @@ const getPrediction = async (request, h) => {
   }
 };
 
+const getEmotionsByUserIdHandler = async (request, h) => {
+  try {
+    const { userId } = request.params;
+    const response = await db.query(
+      "SELECT * FROM emotion_histories WHERE user_id = $1",
+      [userId]
+    );
+
+    return h
+      .response({
+        status: "success",
+        data: response.rows,
+      })
+      .code(200);
+
+  } catch (error) {
+    return h
+      .response({
+        status: "error",
+        message: error.message,
+      })
+      .code(400);
+  }
+}
+
+const postEmotionHandler = async (request, h) => {
+  try {
+    const { user_id, emotion_code } = request.payload;
+    const timestamp = new Date().toISOString();
+    await db.query(
+      "INSERT INTO emotion_histories (user_id, emotion_code, created_at) VALUES ($1, $2, $3)",
+      [user_id, emotion_code, timestamp]
+    );
+
+    return h
+      .response({
+        status: "success",
+        message: "Emotion recorded successfully",
+      })
+      .code(201);
+  } catch (error) {
+    return h
+      .response({
+        status: "error",
+        message: error.message,
+      })
+      .code(400);
+  }
+}
+
 module.exports = {
   getAllFeedbacksHandler,
   addFeedbackHandler,
@@ -239,4 +289,6 @@ module.exports = {
   getStoryCommentsHandler,
   addStoryCommentHandler,
   getPrediction,
+  getEmotionsByUserIdHandler,
+  postEmotionHandler
 };
