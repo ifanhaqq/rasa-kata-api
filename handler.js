@@ -43,7 +43,7 @@ const getAllStoryPostsHandler = async (request, h) => {
   try {
     // 1. Fetch all stories (avoid SELECT * for security & performance)
     const { rows: stories } = await db.query(
-      "SELECT id, content, created_at, updated_at FROM story_posts ORDER BY created_at DESC"
+      "SELECT id, content, anonymous_username, created_at, updated_at FROM story_posts ORDER BY created_at DESC"
     );
 
     // 2. Get comment counts in a single query (instead of N+1 queries)
