@@ -1,25 +1,42 @@
-const Hapi = require('@hapi/hapi');
-const routes = require('./routes');
+const Hapi = require("@hapi/hapi");
+const routes = require("./routes");
+const authPlugin = require("./plugins/auth");
+const auth = require("./routes/auth");
 
 const init = async () => {
   const server = Hapi.server({
     port: process.env.PORT || 3000,
-    host: '0.0.0.0',
+    host: "0.0.0.0",
     routes: {
       cors: {
-        origin: ['http://localhost:5173', 'http://localhost:3307'],
-        additionalHeaders: ['cache-control', 'x-requested-with'],
+        origin: ["http://localhost:5173", "http://localhost:3307"],
+        additionalHeaders: ["cache-control", "x-requested-with"],
       },
     },
   });
 
+  await server.register(authPlugin);
+
+  server.route(auth);
+
   server.route(routes);
 
+  server.ext('onPreResponse', (request, h) => {
+    if (request.response.isBoom) {
+        console.error('Error details:', {
+            error: request.response.message,
+            stack: request.response.stack,
+            data: request.response.data
+        });
+    }
+    return h.continue;
+});
+
   await server.start();
-  console.log('Server running on %s', server.info.uri);
+  console.log("Server running on %s", server.info.uri);
 };
 
-process.on('unhandledRejection', (err) => {
+process.on("unhandledRejection", (err) => {
   console.log(err);
   process.exit(1);
 });
