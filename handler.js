@@ -122,11 +122,11 @@ const getStoryById = async (request, h) => {
 
 const addStoryPostHandler = async (request, h) => {
   try {
-    const { content } = request.payload;
+    const { content, anonymous_username } = request.payload;
     const timestamp = new Date().toISOString();
     const res = await db.query(
-      "INSERT INTO story_posts (content, created_at, updated_at) VALUES ($1, $2, $3) RETURNING *",
-      [content, timestamp, timestamp]
+      "INSERT INTO story_posts (content, created_at, updated_at, anonymous_username) VALUES ($1, $2, $3, $4) RETURNING *",
+      [content, timestamp, timestamp, anonymous_username]
     );
     return h.response(res.rows[0]).code(201);
   } catch (error) {
