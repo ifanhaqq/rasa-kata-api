@@ -120,6 +120,39 @@ const getStoryById = async (request, h) => {
   }
 };
 
+const getStoryByUsernameHandler = async (request, h) => {
+  const { username } = request.params;
+  try {
+    const data = await db.query(
+      "SELECT * FROM story_posts WHERE anonymous_username = $1",
+      [username]
+    );
+
+    if (data.rows.length === 0) {
+      return h
+        .response({
+          status: "error",
+          message: "Story not found",
+        })
+        .code(404);
+    }
+
+    const response = h.response({
+      status: "success",
+      data: data.rows,
+    });
+
+    return response.code(200);
+  } catch (error) {
+    const response = h.response({
+      status: "error",
+      message: error,
+    });
+
+    return response.code(400);
+  }
+}
+
 const addStoryPostHandler = async (request, h) => {
   try {
     const { content, anonymous_username } = request.payload;
@@ -290,5 +323,6 @@ module.exports = {
   addStoryCommentHandler,
   getPrediction,
   getEmotionsByUserIdHandler,
-  postEmotionHandler
+  postEmotionHandler,
+  getStoryByUsernameHandler
 };
