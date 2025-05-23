@@ -234,7 +234,7 @@ const getEmotionsByUserIdHandler = async (request, h) => {
   try {
     const { userId } = request.params;
     const response = await db.query(
-      "SELECT * FROM emotion_histories WHERE user_id = $1",
+      "SELECT * FROM emotion_histories WHERE user_id = $1 ORDER BY created_at DESC",
       [userId]
     );
 
