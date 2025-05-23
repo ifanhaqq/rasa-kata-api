@@ -89,7 +89,7 @@ module.exports = [
   },
   {
     method: "GET",
-    path: "/api/story/{username}",
+    path: "/api/story/{username}/username",
     handler: getStoryByUsernameHandler
   }
 ];
