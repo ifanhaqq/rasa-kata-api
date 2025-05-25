@@ -14,6 +14,7 @@ const init = async () => {
           "http://localhost:3307",
           "https://rasakata.me",
           "https://harmonious-gelato-9335cc.netlify.app/",
+          "http://localhost:4173/",
         ],
         additionalHeaders: ["cache-control", "x-requested-with"],
       },
