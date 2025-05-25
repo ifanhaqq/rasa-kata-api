@@ -9,7 +9,12 @@ const init = async () => {
     host: "0.0.0.0",
     routes: {
       cors: {
-        origin: ["http://localhost:5173", "http://localhost:3307", "https://rasakata.me"],
+        origin: [
+          "http://localhost:5173",
+          "http://localhost:3307",
+          "https://rasakata.me",
+          "https://harmonious-gelato-9335cc.netlify.app/",
+        ],
         additionalHeaders: ["cache-control", "x-requested-with"],
       },
     },
@@ -21,16 +26,16 @@ const init = async () => {
 
   server.route(routes);
 
-  server.ext('onPreResponse', (request, h) => {
+  server.ext("onPreResponse", (request, h) => {
     if (request.response.isBoom) {
-        console.error('Error details:', {
-            error: request.response.message,
-            stack: request.response.stack,
-            data: request.response.data
-        });
+      console.error("Error details:", {
+        error: request.response.message,
+        stack: request.response.stack,
+        data: request.response.data,
+      });
     }
     return h.continue;
-});
+  });
 
   await server.start();
   console.log("Server running on %s", server.info.uri);
