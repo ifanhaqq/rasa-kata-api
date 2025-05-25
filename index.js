@@ -9,7 +9,7 @@ const init = async () => {
     host: "0.0.0.0",
     routes: {
       cors: {
-        origin: ["http://localhost:5173", "http://localhost:3307"],
+        origin: ["http://localhost:5173", "http://localhost:3307", "https://rasakata.me"],
         additionalHeaders: ["cache-control", "x-requested-with"],
       },
     },
