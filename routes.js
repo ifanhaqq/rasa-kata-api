@@ -26,6 +26,9 @@ module.exports = [
         })
         .code(200);
     },
+    options: {
+      auth: false, // No authentication required for the root endpoint
+    },
   },
   {
     method: "GET",
