@@ -27,8 +27,6 @@ const authPlugin = {
             return { isValid: false };
           }
 
-          console.log(artifacts);
-
           // 2. Verify payload has required claims
           const payload = artifacts;
           if (!payload.user) {
