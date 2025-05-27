@@ -198,12 +198,12 @@ const getStoryCommentsHandler = async (request, h) => {
 
 const addStoryCommentHandler = async (request, h) => {
   try {
-    const { content } = request.payload;
+    const { content, anonymous_username } = request.payload;
     const { id } = request.params;
     const timestamp = new Date().toISOString();
     await db.query(
-      "INSERT INTO story_comments (post_id, content, created_at, updated_at) VALUES ($1, $2, $3, $4) RETURNING *",
-      [id, content, timestamp, timestamp]
+      "INSERT INTO story_comments (post_id, content, created_at, updated_at, anonymous_username) VALUES ($1, $2, $3, $4, $5) RETURNING *",
+      [id, content, timestamp, timestamp, anonymous_username]
     );
 
     const story = await db.query(
