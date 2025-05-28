@@ -350,7 +350,7 @@ const postEmotionHandler = async (request, h) => {
     const { user_id, emotion_code } = request.payload;
     const timestamp = new Date().toISOString();
     await db.query(
-      "INSERT INTO emotion_histories (user_id, emotion_code, created_at) VALUES ($1, $2, $3)",
+      "INSERT INTO emotion_histories (user_id, emotion_code, prompt, created_at) VALUES ($1, $2, $3)",
       [user_id, emotion_code, timestamp]
     );
 
