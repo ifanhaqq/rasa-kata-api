@@ -263,6 +263,30 @@ const getPrediction = async (request, h) => {
   }
 };
 
+const getFeedbackRecommendation = async (request, h) => {
+  try {
+    const { emotionCode } = request.params;
+    const response = await db.query(
+      "SELECT * FROM feedback_videos WHERE emotion_code = $1 ORDER BY RANDOM() LIMIT 3",
+      [emotionCode]
+    );
+
+    return h
+      .response({
+        status: "success",
+        data: response.rows,
+      })
+      .code(200);
+  } catch (error) {
+    return h
+      .response({
+        status: "error",
+        message: error.message,
+      })
+      .code(400);
+  }
+}
+
 const getEmotionsByUserIdHandler = async (request, h) => {
   try {
     const { userId } = request.params;
@@ -358,5 +382,6 @@ module.exports = {
   getEmotionsByUserIdHandler,
   postEmotionHandler,
   getStoryByUsernameHandler,
-  getEmotionById
+  getEmotionById,
+  getFeedbackRecommendation
 };
