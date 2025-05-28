@@ -288,6 +288,39 @@ const getEmotionsByUserIdHandler = async (request, h) => {
   }
 }
 
+const getEmotionById = async (request, h) => {
+  try {
+    const { id } = request.params;
+    const response = await db.query(
+      "SELECT * FROM emotion_histories WHERE id = $1",
+      [id]
+    );
+
+    if (response.rows.length === 0) {
+      return h
+        .response({
+          status: "error",
+          message: "Emotion history not found",
+        })
+        .code(404);
+    }
+
+    return h
+      .response({
+        status: "success",
+        data: response.rows[0],
+      })
+      .code(200);
+  } catch (error) {
+    return h
+      .response({
+        status: "error",
+        message: error.message,
+      })
+      .code(400);
+  }
+}
+
 const postEmotionHandler = async (request, h) => {
   try {
     const { user_id, emotion_code } = request.payload;
@@ -324,5 +357,6 @@ module.exports = {
   getPrediction,
   getEmotionsByUserIdHandler,
   postEmotionHandler,
-  getStoryByUsernameHandler
+  getStoryByUsernameHandler,
+  getEmotionById
 };
