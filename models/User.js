@@ -20,6 +20,14 @@ class User {
     static async comparePassword(plainPassword, hashedPassword) {
         return await bcrypt.compare(plainPassword, hashedPassword);
     }
+
+    static async updateUser(id, userData) {
+        const res = await db.query(
+            'UPDATE users SET name = $1, email = $2, anonymous_username = $3 WHERE id = $4 RETURNING *',
+            [userData.name, userData.email, userData.anonymous_username, id]
+        );
+        return res.rows[0];
+    }
 }
 
 module.exports = User;

@@ -71,5 +71,40 @@ module.exports = [
                 }),
             },
         }
+    },
+    {
+        method: 'PUT',
+        path: '/api/user/{id}',
+        handler: async (request, h) => {
+            try {
+                const userId = request.params.id;
+                const userData = request.payload;
+                const updatedUser = await User.updateUser(userId, userData);
+                if (!updatedUser) {
+                    return h.response({ error: 'User update failed' }).code(400);
+                }
+                const { password, ...userWithoutPassword } = updatedUser;
+                return h.response({
+                    status: 'success',
+                    data: {
+                        user: userWithoutPassword,
+                    },
+                }).code(200);
+            } catch (error) {
+                return h.response({ error: error.message }).code(400);
+            }
+        },
+        options: {
+            validate: {
+                params: Joi.object({
+                    id: Joi.required(),
+                }),
+                payload: Joi.object({
+                    name: Joi.string().required(),
+                    email: Joi.string().email().required(),
+                    anonymous_username: Joi.string().required(),
+                }),
+            }
+        }
     }
 ]
