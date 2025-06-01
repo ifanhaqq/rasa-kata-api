@@ -10,7 +10,6 @@ const init = async () => {
     routes: {
       cors: {
         origin: [
-          "http://localhost:5173",
           "http://localhost:3307",
           "https://rasakata.me",
           "https://harmonious-gelato-9335cc.netlify.app/",
