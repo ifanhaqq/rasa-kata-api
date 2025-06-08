@@ -2,6 +2,7 @@ const Hapi = require("@hapi/hapi");
 const routes = require("./routes");
 const authPlugin = require("./plugins/auth");
 const auth = require("./routes/auth");
+const savingGoals = require("./routes/savingGoals");
 
 const init = async () => {
   const server = Hapi.server({
@@ -25,6 +26,8 @@ const init = async () => {
   server.route(auth);
 
   server.route(routes);
+
+  server.route(savingGoals);
 
   server.ext("onPreResponse", (request, h) => {
     if (request.response.isBoom) {
